@@ -1,0 +1,55 @@
+{
+  "name": "trading-academy",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0 <23"
+  },
+  "scripts": {
+    "dev": "next dev --webpack",
+    "analyze": "ANALYZE=true next build --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run --exclude tests/prerender.test.ts",
+    "test:prerender": "vitest run tests/prerender.test.ts",
+    "test:watch": "vitest",
+    "package:godaddy": "python3 -B scripts/package-godaddy.py",
+    "test:godaddy": "python3 -B tests/godaddy_package_test.py",
+    "godaddy:login": "python3 -B scripts/godaddy-login.py"
+  },
+  "dependencies": {
+    "@next/bundle-analyzer": "^16.4.3",
+    "@next/third-parties": "^16.4.3",
+    "@react-three/fiber": "^9.7.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19.2.7",
+    "@types/three": "^0.185.4",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^13.1.1",
+    "lenis": "^1.3.26",
+    "next": "16.4.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4",
+    "three": "^0.185.1",
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "source-map-js": "1.2.2"
+  }
+}

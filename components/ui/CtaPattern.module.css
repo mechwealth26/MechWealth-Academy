@@ -1,0 +1,53 @@
+.pattern {
+  --line-grid: linear-gradient(90deg, currentColor 1px, transparent 1px),
+    linear-gradient(0deg, currentColor 1px, transparent 1px);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  color: var(--color-gold-400);
+  mask-image: linear-gradient(90deg, #000, transparent 40%, transparent 60%, #000);
+}
+
+.pattern::before,
+.sweep {
+  position: absolute;
+  inset: 0;
+}
+
+.pattern::before {
+  content: "";
+  background-image: var(--line-grid);
+  background-size: 96px 96px;
+  opacity: 0.075;
+}
+
+.sweep {
+  mask-image: var(--line-grid);
+  mask-size: 96px 96px;
+  opacity: 0.28;
+}
+
+.sweep::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: -35%;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pattern[data-entered="true"] .sweep::before {
+    animation: cta-light-pass 4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+}
+
+@keyframes cta-light-pass {
+  0% { transform: translateX(0); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { transform: translateX(386%); opacity: 0; }
+}

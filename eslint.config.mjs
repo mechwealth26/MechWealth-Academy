@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".godaddy/**",
   ]),
   {
     // React Three Fiber scenes mutate Three.js objects inside the render

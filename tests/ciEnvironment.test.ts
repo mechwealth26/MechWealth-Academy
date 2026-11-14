@@ -13,5 +13,6 @@ describe("QA production environment", () => {
     expect(resolveSiteUrl(origin, true)).toBe("https://mechwealth.com");
     expect(workflow).toContain("run: npm run build");
     expect(workflow).toContain("run: npm run test:prerender");
+    expect(workflow).toContain("run: npx next typegen && npx tsc --noEmit");
   });
 });

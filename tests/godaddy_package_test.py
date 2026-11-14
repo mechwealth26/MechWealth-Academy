@@ -29,6 +29,7 @@ class GoDaddySourcePackageTests(unittest.TestCase):
         (self.root / "app/page.tsx").write_text("export default function Page() {}")
         names = packager.package_source(self.root, self.output)
         self.assertIn("app/page.tsx", names)
+        self.assertIn("tsconfig.build.json", names)
         with zipfile.ZipFile(self.output) as archive:
             self.assertEqual(archive.read(".env.production").decode(), "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\n")
 

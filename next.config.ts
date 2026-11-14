@@ -10,6 +10,8 @@ const withBundleAnalyzer = createBundleAnalyzer({
 const nextConfig: NextConfig = {
   // GoDaddy's authenticated preview runs the dev server on this exact host.
   allowedDevOrigins: ["xya3gs1vuu.preview.c35.airoapp.ai"],
+  // The host installs production dependencies; CI checks tests separately.
+  typescript: { tsconfigPath: "tsconfig.build.json" },
   // Explicit gzip/brotli compression for `next start` deployments
   compress: true,
   // Keep file tracing scoped to this nested project, not the parent home lockfile.

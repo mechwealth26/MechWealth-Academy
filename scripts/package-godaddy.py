@@ -6,7 +6,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ("app", "components", "data", "hooks", "lib", "public", "styles")
-FILES = ("package.json", "package-lock.json", "next.config.ts", "postcss.config.mjs", "tsconfig.json")
+FILES = ("package.json", "package-lock.json", "next.config.ts", "postcss.config.mjs", "tsconfig.json", "tsconfig.build.json")
 SITE_ENV = "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\n"
 
 

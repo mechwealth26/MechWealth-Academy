@@ -3,6 +3,7 @@ import { siteConfig } from "@/data/site";
 const PLATFORMS = [
   { name: "Instagram", host: "instagram.com" },
   { name: "Facebook", host: "facebook.com" },
+  { name: "YouTube", host: "youtube.com" },
 ] as const;
 
 export default function FooterSocialLinks() {
@@ -33,9 +34,14 @@ export default function FooterSocialLinks() {
               <circle cx="12" cy="12" r="4" />
               <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
             </svg>
-          ) : (
+          ) : name === "Facebook" ? (
             <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
               <path d="M14 21v-8h2.7l.4-3H14V8c0-.9.3-1.5 1.6-1.5H17V3.8a18 18 0 0 0-2.3-.2C12.4 3.6 11 5 11 7.7V10H8v3h3v8h3Z" />
+            </svg>
+          ) : (
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
+              <rect x="2" y="5" width="20" height="14" rx="4" />
+              <path d="m10 8 6 4-6 4V8Z" fill="currentColor" stroke="none" />
             </svg>
           );
           const classes = "inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold-500/25 text-gold-400";

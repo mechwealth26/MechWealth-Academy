@@ -8,10 +8,11 @@ export const siteConfig = {
   // Local development can use localhost; production requires an explicit origin.
   url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL, process.env.NODE_ENV === "production"),
   logo: "/images/mechwealth-logo.svg",
-  socialLinks: (process.env.NEXT_PUBLIC_SOCIAL_LINKS ?? "")
-    .split(",")
-    .map((url) => url.trim())
-    .filter(Boolean),
+  socialLinks: [
+    "https://www.instagram.com/mechwealth_academy/",
+    "https://www.facebook.com/mechwealthacademy",
+    "https://www.youtube.com/@MechWealth",
+  ],
   privacyEmail:
     process.env.NEXT_PUBLIC_PRIVACY_EMAIL ?? "privacy@mechwealth.example",
   nav: [

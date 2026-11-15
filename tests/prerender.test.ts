@@ -59,8 +59,9 @@ describe("prerendered routes (requires a completed production build)", () => {
       const theme = document.querySelector('header button[aria-haspopup="menu"]');
       expect(theme?.getAttribute("aria-label")).toBe("Theme: dark. Resolved to dark.");
       expect(theme?.textContent).toBe("");
-      expect(document.querySelector('header a[href="https://wa.me/919164546528"]')?.getAttribute("aria-label"))
-        .toContain("WhatsApp");
+      expect(document.querySelector('header a[href^="https://wa.me/"]')).toBeNull();
+      const chat = document.querySelector('button[aria-label="Open website chat"]');
+      expect(chat?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     }
   });
 

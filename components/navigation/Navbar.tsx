@@ -20,23 +20,6 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
-function WhatsAppLink() {
-  return (
-    <a
-      href={`https://wa.me/${siteConfig.contact.telephone.replace(/\D/g, "")}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Chat with MECHWEALTH on WhatsApp (opens in a new tab)"
-      title={`WhatsApp: ${siteConfig.contact.phone}`}
-      className="theme-switcher-button inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-copy-secondary transition-colors hover:text-cream-100"
-    >
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-        <path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.5 0 .1 5.4.1 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6a12 12 0 0 0 5.8 1.5h.1c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.6-8.4ZM12.1 21.9a10 10 0 0 1-5.1-1.4l-.4-.2-3.7 1 1-3.6-.3-.4A10 10 0 0 1 2.1 12c0-5.5 4.5-10 10-10a10 10 0 0 1 7.1 2.9 10 10 0 0 1 2.9 7.1c0 5.5-4.5 9.9-10 9.9Zm5.5-7.4c-.3-.1-1.8-.9-2.1-1-.3-.1-.5-.1-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.6-.9-.8-1.6-1.8-1.8-2.1-.2-.3 0-.5.1-.6l.5-.6.3-.5c.1-.2.1-.4 0-.5L8.8 6.6c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1 1-1 2.5 1.1 2.9 1.3 3.1c.1.2 2.1 3.3 5.1 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4Z" />
-      </svg>
-    </a>
-  );
-}
-
 /**
  * Global navigation.
  *
@@ -107,6 +90,7 @@ export default function Navbar() {
       headerRef.current,
       document.querySelector<HTMLElement>("main#main"),
       document.querySelector<HTMLElement>("footer"),
+      document.querySelector<HTMLElement>("[data-website-chat]"),
     ].filter((element): element is HTMLElement => Boolean(element));
 
     const ownedInertElements = backgroundElements.filter(
@@ -225,7 +209,6 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center justify-self-end xl:gap-3">
-            <WhatsAppLink />
             <ThemeSwitcher />
             <Link
               href={siteConfig.cta.href}
@@ -281,7 +264,6 @@ export default function Navbar() {
                   <BrandMark />
                 </span>
                 <div className="flex items-center gap-1">
-                  <WhatsAppLink />
                   <ThemeSwitcher />
                   <button
                     type="button"

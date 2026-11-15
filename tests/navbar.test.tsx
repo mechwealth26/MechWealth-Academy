@@ -1,7 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Navbar from "@/components/navigation/Navbar";
-import { siteConfig } from "@/data/site";
 
 const lenis = vi.hoisted(() => ({ stop: vi.fn(), start: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/resources" }));
@@ -40,6 +39,7 @@ function renderPage() {
     <Navbar />
     <main id="main"><button>Page action</button></main>
     <footer>Footer</footer>
+    <button data-website-chat>Website chat</button>
   </>);
 }
 
@@ -57,16 +57,13 @@ function crossBreakpoint(matches: boolean) {
 }
 
 describe("mobile menu cleanup", () => {
-  it("links the header and open menu icons to the existing WhatsApp contact without changing the number", () => {
+  it("keeps theme controls and removes WhatsApp links from the header and open menu", () => {
     renderPage();
-    const name = "Chat with MECHWEALTH on WhatsApp (opens in a new tab)";
-    const link = screen.getByRole("link", { name });
-    expect(link.getAttribute("href")).toBe("https://wa.me/919164546528");
-    expect(link.getAttribute("href")).toBe(`https://wa.me/${siteConfig.contact.telephone.replace(/\D/g, "")}`);
-    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
-    expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(screen.queryByRole("link", { name: /WhatsApp/ })).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Theme choices" })).toHaveLength(1);
     openMenu();
-    expect(document.querySelector('#mobile-menu a[href="https://wa.me/919164546528"]')).not.toBeNull();
+    expect(document.querySelector('#mobile-menu a[href^="https://wa.me/"]')).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Theme choices" })).toHaveLength(2);
   });
   it("closes at the desktop breakpoint and restores page input, scrolling and visible focus", () => {
     renderPage();
@@ -74,6 +71,7 @@ describe("mobile menu cleanup", () => {
     expect(screen.getByRole("dialog", { name: "Menu" })).toBeTruthy();
     expect(document.querySelector("main")!.inert).toBe(true);
     expect(document.querySelector("header")!.inert).toBe(true);
+    expect(document.querySelector<HTMLElement>("[data-website-chat]")!.inert).toBe(true);
     expect(document.documentElement.style.overflow).toBe("hidden");
     expect(lenis.stop).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(screen.getByRole("link", { name: /01\s*Home/ }));
@@ -83,7 +81,7 @@ describe("mobile menu cleanup", () => {
     crossBreakpoint(true);
 
     expect(screen.queryByRole("dialog", { name: "Menu" })).toBeNull();
-    for (const selector of ['a[href="#main"]', "header", "main", "footer"]) {
+    for (const selector of ['a[href="#main"]', "header", "main", "footer", "[data-website-chat]"]) {
       expect(document.querySelector<HTMLElement>(selector)!.inert).toBe(false);
     }
     expect(document.documentElement.style.overflow).toBe("");

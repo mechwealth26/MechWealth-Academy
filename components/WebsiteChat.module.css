@@ -1,0 +1,20 @@
+.panel {
+  color-scheme: light;
+  color: #111827;
+}
+
+.panel input::placeholder {
+  color: #52625f;
+  opacity: 1;
+}
+
+.panel button:focus-visible,
+.panel input:focus-visible,
+.launcher:focus-visible {
+  outline: 3px solid #075e54;
+  outline-offset: 3px;
+}
+
+.header button:focus-visible {
+  outline-color: #fff;
+}

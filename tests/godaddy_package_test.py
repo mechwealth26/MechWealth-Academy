@@ -25,13 +25,13 @@ class GoDaddySourcePackageTests(unittest.TestCase):
             (self.root / name).mkdir()
         self.output = self.root / ".godaddy/source.zip"
 
-    def test_includes_application_and_generates_only_the_confirmed_public_origin(self):
+    def test_includes_application_and_generates_only_the_confirmed_public_settings(self):
         (self.root / "app/page.tsx").write_text("export default function Page() {}")
         names = packager.package_source(self.root, self.output)
         self.assertIn("app/page.tsx", names)
         self.assertIn("tsconfig.build.json", names)
         with zipfile.ZipFile(self.output) as archive:
-            self.assertEqual(archive.read(".env.production").decode(), "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\n")
+            self.assertEqual(archive.read(".env.production").decode(), "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\nNEXT_PUBLIC_GA_MEASUREMENT_ID=G-5NDD0P1VTN\n")
 
     def test_excludes_local_secrets_ignored_folders_tests_and_reports(self):
         for name in (".env.local", ".env.production", "public/.env", ".vercel/project.json", ".godaddy/credentials", "node_modules/fake.txt", "tests/fake.ts", "docs/report.md"):

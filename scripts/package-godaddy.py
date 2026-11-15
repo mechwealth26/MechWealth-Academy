@@ -7,7 +7,10 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ("app", "components", "data", "hooks", "lib", "public", "styles")
 FILES = ("package.json", "package-lock.json", "next.config.ts", "postcss.config.mjs", "tsconfig.json", "tsconfig.build.json")
-SITE_ENV = "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\n"
+SITE_ENV = (
+    "NEXT_PUBLIC_SITE_URL=https://mechwealth.com\n"
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID=G-5NDD0P1VTN\n"
+)
 
 
 def package_source(root, output):
@@ -29,7 +32,7 @@ def package_source(root, output):
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(sources):
             archive.write(path, path.relative_to(root).as_posix())
-        # Generated public origin only; existing local .env files are never read.
+        # Generated public build settings only; existing local .env files are never read.
         archive.writestr(".env.production", SITE_ENV)
     with zipfile.ZipFile(output) as archive:
         names = archive.namelist()

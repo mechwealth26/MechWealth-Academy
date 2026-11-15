@@ -7,6 +7,7 @@ import { siteConfig } from "@/data/site";
 import AnalyticsManager from "@/components/analytics/AnalyticsManager";
 import SkipLink from "@/components/navigation/SkipLink";
 import ThemeProvider from "@/components/theme/ThemeProvider";
+import WebsiteChat from "@/components/WebsiteChat";
 import "@/styles/globals.css";
 
 /** Display / headings */
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AnalyticsManager enableVercel={Boolean(process.env.VERCEL)} />
           </SmoothScrollProvider>
         </ThemeProvider>
+        <WebsiteChat />
       </body>
     </html>
   );

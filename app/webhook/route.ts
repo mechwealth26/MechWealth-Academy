@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { COURSE_STAGES } from "@/data/courses";
 
 export const runtime = "nodejs";
 const API_VERSION = "v21.0";
@@ -66,22 +67,17 @@ export async function POST(req: Request) {
         if (message.type !== "text" || typeof from !== "string" || !/^\d+$/.test(from) ||
             typeof textBody !== "string") continue;
         const text = textBody.toLowerCase().trim();
-        let reply = '';
-
-        if (text === 'hi' || text === 'hello' || text === 'hey') {
-          reply = `Hi! Welcome to MechWealth 👋\n\nWhat do you want to learn?\n1. Trading Courses\n2. Investing Courses\n3. Free Demo\n4. Talk to Team\n\nReply with 1, 2, 3 or 4`;
-        } else if (text === '1') {
-          reply = `Great! Our Trading Course covers Price Action + Risk Management.\n\nWant the full syllabus? Reply YES`;
-        } else if (text === '2') {
-          reply = `Great! Our Investing Course covers Stocks + Mutual Funds for long term wealth.\n\nWant the full syllabus? Reply YES`;
-        } else if (text === '3') {
-          reply = `Awesome! Share your Name and we will book your Free Demo.`;
-        } else if (text === '4') {
-          reply = `Our team will contact you shortly. Please share your Name and City.`;
-        } else if (text === 'yes') {
-          reply = `Perfect! Please share your Name and Phone Number and our team will send you the syllabus on WhatsApp.`;
+        const course = COURSE_STAGES.find((stage) => String(Number(stage.num)) === text);
+        let reply: string;
+        if (text === "hi" || text === "hello" || text === "hey") {
+          const menu = COURSE_STAGES.map((stage) => `${Number(stage.num)}. ${stage.title} — ${stage.level}`).join("\n");
+          reply = `Hi! Welcome to MECHWEALTH 👋\n\nChoose a course to learn more:\n${menu}\n\nReply with 1, 2, 3 or 4.\nCompare the courses: https://mechwealth.com/courses`;
+        } else if (course) {
+          reply = `${course.title} — ${course.level}\n\n${course.description}\n\nWho it is for: ${course.audience}\n\nCourse details: https://mechwealth.com/courses/${course.slug}\nFor syllabus and enquiries: https://mechwealth.com/contact`;
+        } else if (text === "yes") {
+          reply = "You can request a syllabus or ask about a course here: https://mechwealth.com/contact\n\nReply HI to see the courses again.";
         } else {
-          reply = `Thanks for messaging MechWealth! Reply HI to see the menu again.`;
+          reply = "Thanks for messaging MECHWEALTH! Reply HI to see the courses, or send an enquiry at https://mechwealth.com/contact";
         }
 
         try {

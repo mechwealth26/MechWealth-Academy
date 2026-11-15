@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/webhook/route";
+import { COURSE_STAGES } from "@/data/courses";
 
 const appSecret = "test-only-app-secret";
 const phoneNumberId = "123456789";
@@ -74,7 +75,7 @@ describe("WhatsApp webhook messages (all outbound requests mocked)", () => {
     }
     expect(fetch).not.toHaveBeenCalled();
   });
-  it("authenticates raw UTF-8 bytes and preserves the supplied greeting flow", async () => {
+  it("authenticates raw UTF-8 bytes and shows the current course menu", async () => {
     const log = vi.spyOn(console, "log");
     const error = vi.spyOn(console, "error");
     const unicodeResponse = await POST(post(JSON.stringify(payload("  Hello 👋  "))));
@@ -83,10 +84,27 @@ describe("WhatsApp webhook messages (all outbound requests mocked)", () => {
     expect(fetch).toHaveBeenLastCalledWith(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, expect.objectContaining({
       method: "POST", headers: { Authorization: "Bearer test-only-access-token", "Content-Type": "application/json" },
       signal: expect.any(AbortSignal),
-      body: JSON.stringify({ messaging_product: "whatsapp", to: sender, type: "text", text: { body: "Hi! Welcome to MechWealth 👋\n\nWhat do you want to learn?\n1. Trading Courses\n2. Investing Courses\n3. Free Demo\n4. Talk to Team\n\nReply with 1, 2, 3 or 4" } }),
+      body: JSON.stringify({ messaging_product: "whatsapp", to: sender, type: "text", text: { body: "Hi! Welcome to MECHWEALTH 👋\n\nChoose a course to learn more:\n1. Foundation — Beginner\n2. Practitioner — Intermediate\n3. Method — Advanced\n4. One-to-One — Advanced\n\nReply with 1, 2, 3 or 4.\nCompare the courses: https://mechwealth.com/courses" } }),
     }));
     expect(log).not.toHaveBeenCalled();
     expect(error).not.toHaveBeenCalled();
+  });
+  it.each(COURSE_STAGES)("describes $title using the website catalog", async (course) => {
+    expect((await POST(post(payload(String(Number(course.num)))))).status).toBe(200);
+    const options = vi.mocked(fetch).mock.calls[0][1]!;
+    const reply = JSON.parse(String(options.body)).text.body;
+    expect(reply).toContain(`${course.title} — ${course.level}`);
+    expect(reply).toContain(course.description);
+    expect(reply).toContain(course.audience);
+    expect(reply).toContain(`https://mechwealth.com/courses/${course.slug}`);
+    expect(reply).toContain("https://mechwealth.com/contact");
+    expect(reply).not.toMatch(/Free Demo|Investing Course|will book|will contact|share your Name/i);
+  });
+  it.each(["yes", "unknown"])("directs %s to the existing enquiry page without promising follow-up", async (text) => {
+    expect((await POST(post(payload(text)))).status).toBe(200);
+    const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body)).text.body;
+    expect(reply).toContain("https://mechwealth.com/contact");
+    expect(reply).not.toMatch(/Free Demo|Investing Course|will book|will contact|share your Name/i);
   });
   it("handles batched messages and ignores receipts, other numbers and invalid text/senders", async () => {
     const body = payload();

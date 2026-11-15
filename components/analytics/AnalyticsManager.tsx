@@ -17,7 +17,8 @@ function clearGoogleAnalyticsCookies() {
 }
 
 export default function AnalyticsManager({ enableVercel }: { enableVercel: boolean }) {
-  const [consent, setConsent] = useState<Consent>(null);
+  // Wait for saved consent before showing a choice the visitor may already have made.
+  const [consent, setConsent] = useState<Consent | undefined>(undefined);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [suspended, setSuspended] = useState(false);
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -64,7 +65,7 @@ export default function AnalyticsManager({ enableVercel }: { enableVercel: boole
     }
   };
 
-  const showBanner = !suspended && (consent === null || preferencesOpen);
+  const showBanner = !suspended && consent !== undefined && (consent === null || preferencesOpen);
 
   return (
     <>

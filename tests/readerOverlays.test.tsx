@@ -73,7 +73,7 @@ describe("reader overlay coordination", () => {
     renderPage();
     await waitFor(() => expect(screen.queryByRole("button", { name: "Reject" })).toBeNull());
     fireEvent.click(screen.getByRole("button", { name: "Cookie preferences" }));
-    expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Reject" })).toBeTruthy();
     fireEvent.click(screen.getByRole("link", { name: "Read Read the Candle" }));
     expect(screen.queryByRole("button", { name: "Reject" })).toBeNull();
     fireEvent.keyDown(window, { key: "Escape" });

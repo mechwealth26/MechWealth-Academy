@@ -83,7 +83,9 @@ describe("prerendered routes (requires a completed production build)", () => {
       expect(theme?.getAttribute("aria-label")).toBe("Theme: dark. Resolved to dark.");
       expect(theme?.textContent).toBe("");
       expect(document.querySelector('header a[href^="https://wa.me/"]')).toBeNull();
-      const chat = document.querySelector('button[aria-label="Open website chat"]');
+      const chat = document.querySelector('a[data-website-chat]');
+      expect(chat?.getAttribute("href")).toBe("https://wa.me/919164546528");
+      expect(chat?.getAttribute("aria-label")).toBe("Chat with MECHWEALTH on WhatsApp (opens in a new tab)");
       expect(chat?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     }
   });

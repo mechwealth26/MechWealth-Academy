@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Navbar from "@/components/navigation/Navbar";
+import WebsiteChat from "@/components/WebsiteChat";
 
 const lenis = vi.hoisted(() => ({ stop: vi.fn(), start: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/resources" }));
@@ -39,7 +40,7 @@ function renderPage() {
     <Navbar />
     <main id="main"><button>Page action</button></main>
     <footer>Footer</footer>
-    <button data-website-chat>Website chat</button>
+    <WebsiteChat />
   </>);
 }
 
@@ -59,7 +60,8 @@ function crossBreakpoint(matches: boolean) {
 describe("mobile menu cleanup", () => {
   it("keeps theme controls and removes WhatsApp links from the header and open menu", () => {
     renderPage();
-    expect(screen.queryByRole("link", { name: /WhatsApp/ })).toBeNull();
+    expect(document.querySelector('header a[href^="https://wa.me/"]')).toBeNull();
+    expect(screen.getByRole("link", { name: /Chat with MECHWEALTH on WhatsApp/ })).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Theme choices" })).toHaveLength(1);
     openMenu();
     expect(document.querySelector('#mobile-menu a[href^="https://wa.me/"]')).toBeNull();

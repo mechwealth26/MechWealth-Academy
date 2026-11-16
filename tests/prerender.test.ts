@@ -51,6 +51,29 @@ describe("course selection initial HTML (requires a completed production build)"
 });
 
 describe("prerendered routes (requires a completed production build)", () => {
+  it.each(SITE_ROUTES)("renders all confirmed social links in the shared footer on $path", (route) => {
+    const document = new DOMParser().parseFromString(htmlFor(route.path)!, "text/html");
+    expect(document.querySelectorAll("footer")).toHaveLength(1);
+    const footer = document.querySelector("footer")!;
+    expect(footer.textContent).toContain("Follow along");
+    expect(footer.textContent).not.toContain("coming soon");
+    const socials = footer.querySelector('ul[aria-label="Social media"]');
+    expect(socials).not.toBeNull();
+    expect(socials!.querySelectorAll("a")).toHaveLength(3);
+    for (const [name, href] of [
+      ["Instagram", "https://www.instagram.com/mechwealth_academy/"],
+      ["Facebook", "https://www.facebook.com/mechwealthacademy"],
+      ["YouTube", "https://www.youtube.com/@MechWealth"],
+    ]) {
+      const link = socials!.querySelector(`a[href="${href}"]`);
+      expect(link, `${route.path}: missing ${name}`).not.toBeNull();
+      expect(link!.getAttribute("aria-label")).toBe(`Follow MECHWEALTH on ${name} (opens in a new tab)`);
+      expect(link!.getAttribute("target")).toBe("_blank");
+      expect(link!.getAttribute("rel")).toBe("noopener noreferrer");
+      expect(link!.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    }
+  });
+
   it("ships a dark default and accessible icon controls on every indexable route", () => {
     for (const route of SITE_ROUTES) {
       const document = new DOMParser().parseFromString(htmlFor(route.path)!, "text/html");

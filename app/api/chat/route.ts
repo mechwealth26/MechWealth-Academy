@@ -1,10 +1,48 @@
-// Website Chat Brain - Separate from WhatsApp, same flow
+// Website Chat Brain - Separate from WhatsApp, same flow + WhatsApp Notification to Owner
+// THIS FILE DOES NOT TOUCH WhatsApp Bot. WhatsApp Bot is in app/webhook/route.ts
 export const runtime = "nodejs";
 
 type Lang = "en" | "hi" | "kn";
 type Session = { lang: Lang; context: string; stage: string };
 
 const sessions = new Map<string, Session>();
+
+const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN!;
+const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID!;
+const ADMIN_NUMBER = process.env.ADMIN_WHATSAPP_NUMBER!;
+const API_VERSION = "v21.0";
+
+// Send notification to YOU on WhatsApp when website lead comes
+async function notifyOwner(name: string, interest: string) {
+  try {
+    console.log("SENDING OWNER NOTIFICATION FOR:", name, interest);
+    const res = await fetch(`https://graph.facebook.com/${API_VERSION}/${PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: ADMIN_NUMBER,
+        type: "template",
+        template: {
+          name: "lead_notification",
+          language: { code: "en" },
+          components: [{
+            type: "body",
+            parameters: [
+              { type: "text", parameter_name: "customer_name", text: name },
+              { type: "text", parameter_name: "interest", text: interest },
+              { type: "text", parameter_name: "time", text: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) },
+            ],
+          }],
+        },
+      }),
+    });
+    const result = await res.text();
+    console.log("OWNER NOTIFICATION RESULT:", res.status, result);
+  } catch (e) {
+    console.error("OWNER NOTIFICATION ERROR:", e);
+  }
+}
 
 function getSession(id: string): Session {
   if (!sessions.has(id)) sessions.set(id, { lang: "en", context: "Free Demo", stage: "language" });
@@ -23,7 +61,6 @@ export async function POST(req: Request) {
   const msg = (message || "").toString().trim();
   const lower = msg.toLowerCase();
 
-  // START - Show language
   if (lower === "hi" || lower === "__start__") {
     s.stage = "language";
     return Response.json({
@@ -107,9 +144,9 @@ export async function POST(req: Request) {
     return Response.json({ text: t, buttons: [{ id: "__start__", title: "Start Again" }] });
   }
 
-  // Name capture
   if (s.stage === "ask_name" && msg.length >= 2) {
     s.stage = "done";
+    notifyOwner(msg, s.context);
     const thanks = s.lang === "hi" ? `धन्यवाद, ${msg}! 🙏\n${s.context} के लिए आपका अनुरोध बुक हो गया है। हमारी टीम आपको कॉल करेगी।\nऔर जानें: www.mechwealth.com` : s.lang === "kn" ? `ಧನ್ಯವಾದಗಳು, ${msg}! 🙏\n${s.context} ಗಾಗಿ ನಿಮ್ಮ ವಿನಂತಿ ಬುಕ್ ಆಗಿದೆ. ನಮ್ಮ ತಂಡವು ನಿಮಗೆ ಕರೆ ಮಾಡುತ್ತದೆ.\nಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ: www.mechwealth.com` : `Thank you, ${msg}! 🙏\nYour request for ${s.context} is booked. Our team will call you.\nLearn more here: www.mechwealth.com`;
     return Response.json({ text: thanks });
   }

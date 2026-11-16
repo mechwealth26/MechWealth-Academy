@@ -175,7 +175,7 @@ export async function POST(req: Request) {
     }
     const visitorName = s.name || "Visitor";
     // FIX 1: Await delivery and check success - do NOT claim booked if it failed
-    const sent = await notifyOwner(visitorName, s.context);
+    const sent = await notifyOwner(visitorName, s.context, phoneDigits);
     s.stage = "done";
     if (sent) {
       const thanks = s.lang === "hi" ? `धन्यवाद, ${visitorName}! 🙏\n${s.context} के लिए आपका अनुरोध बुक हो गया है। हमारी टीम आपको ${phoneDigits} पर कॉल करेगी।\nऔर जानें: www.mechwealth.com` : s.lang === "kn" ? `ಧನ್ಯವಾದಗಳು, ${visitorName}! 🙏\n${s.context} ಗಾಗಿ ನಿಮ್ಮ ವಿನಂತಿ ಬುಕ್ ಆಗಿದೆ. ನಮ್ಮ ತಂಡವು ${phoneDigits} ಗೆ ಕರೆ ಮಾಡುತ್ತದೆ.\nಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ: www.mechwealth.com` : `Thank you, ${visitorName}! 🙏\nYour request for ${s.context} is booked. Our team will call you on ${phoneDigits}.\nLearn more here: www.mechwealth.com`;

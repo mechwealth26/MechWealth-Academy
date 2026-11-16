@@ -13,8 +13,7 @@ export const siteConfig = {
     "https://www.facebook.com/mechwealthacademy",
     "https://www.youtube.com/@MechWealth",
   ],
-  privacyEmail:
-    process.env.NEXT_PUBLIC_PRIVACY_EMAIL ?? "privacy@mechwealth.example",
+  privacyEmail: "info@mechwealth.com",
   nav: [
     { label: "Home", href: "/" },
     { label: "Academy", href: "/academy" },

@@ -3,25 +3,35 @@
 export const runtime = "nodejs";
 
 type Lang = "en" | "hi" | "kn";
-type Session = { lang: Lang; context: string; stage: string };
+type Session = { lang: Lang; context: string; stage: string; name?: string };
 
 const sessions = new Map<string, Session>();
 
-const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN!;
-const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID!;
-const ADMIN_NUMBER = process.env.ADMIN_WHATSAPP_NUMBER!;
-const API_VERSION = "v21.0";
+// FIX 2: Validate config - do not attempt send with missing secrets
+function getConfig() {
+  const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+  const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const ADMIN_NUMBER = process.env.ADMIN_WHATSAPP_NUMBER;
+  if (!ACCESS_TOKEN || !PHONE_NUMBER_ID || !ADMIN_NUMBER) {
+    return null;
+  }
+  return { ACCESS_TOKEN, PHONE_NUMBER_ID, ADMIN_NUMBER, API_VERSION: "v21.0" };
+}
 
-// Send notification to YOU on WhatsApp when website lead comes
-async function notifyOwner(name: string, interest: string) {
+// FIX 1 + Privacy: await delivery, check res.ok, NEVER log name/phone/interest
+async function notifyOwner(name: string, interest: string, phone: string): Promise<boolean> {
+  const cfg = getConfig();
+  if (!cfg) {
+    console.error("OWNER NOTIFICATION FAILED: missing configuration");
+    return false;
+  }
   try {
-    console.log("SENDING OWNER NOTIFICATION FOR:", name, interest);
-    const res = await fetch(`https://graph.facebook.com/${API_VERSION}/${PHONE_NUMBER_ID}/messages`, {
+    const res = await fetch(`https://graph.facebook.com/${cfg.API_VERSION}/${cfg.PHONE_NUMBER_ID}/messages`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${ACCESS_TOKEN}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${cfg.ACCESS_TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         messaging_product: "whatsapp",
-        to: ADMIN_NUMBER,
+        to: cfg.ADMIN_NUMBER,
         type: "template",
         template: {
           name: "lead_notification",
@@ -38,9 +48,16 @@ async function notifyOwner(name: string, interest: string) {
       }),
     });
     const result = await res.text();
-    console.log("OWNER NOTIFICATION RESULT:", res.status, result);
+    // Log only status, never personal details
+    console.log("OWNER NOTIFICATION RESULT:", res.status);
+    if (!res.ok) {
+      console.error("OWNER NOTIFICATION FAILED:", res.status, result.slice(0, 200));
+      return false;
+    }
+    return true;
   } catch (e) {
-    console.error("OWNER NOTIFICATION ERROR:", e);
+    console.error("OWNER NOTIFICATION ERROR");
+    return false;
   }
 }
 
@@ -144,11 +161,29 @@ export async function POST(req: Request) {
     return Response.json({ text: t, buttons: [{ id: "__start__", title: "Start Again" }] });
   }
 
+  // FIX 3: Collect Name first, then Phone - so you can actually call back
   if (s.stage === "ask_name" && msg.length >= 2) {
+    s.name = msg;
+    s.stage = "ask_phone";
+    return Response.json({ text: s.lang === "hi" ? `Thanks, ${msg}! Please share your WhatsApp / Phone number (10 digits) so our team can call you.` : s.lang === "kn" ? `ಧನ್ಯವಾದಗಳು, ${msg}! ನಮ್ಮ ತಂಡವು ನಿಮಗೆ ಕರೆ ಮಾಡಲು ನಿಮ್ಮ WhatsApp / ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು (10 ಅಂಕೆಗಳು) ಹಂಚಿಕೊಳ್ಳಿ.` : `Thanks, ${msg}! Please share your WhatsApp / Phone number (10 digits) so our team can call you.`, showInput: true });
+  }
+
+  if (s.stage === "ask_phone" && msg.length >= 2) {
+    const phoneDigits = msg.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      return Response.json({ text: "Please enter a valid 10-digit phone number.", showInput: true });
+    }
+    const visitorName = s.name || "Visitor";
+    // FIX 1: Await delivery and check success - do NOT claim booked if it failed
+    const sent = await notifyOwner(visitorName, s.context);
     s.stage = "done";
-    notifyOwner(msg, s.context);
-    const thanks = s.lang === "hi" ? `धन्यवाद, ${msg}! 🙏\n${s.context} के लिए आपका अनुरोध बुक हो गया है। हमारी टीम आपको कॉल करेगी।\nऔर जानें: www.mechwealth.com` : s.lang === "kn" ? `ಧನ್ಯವಾದಗಳು, ${msg}! 🙏\n${s.context} ಗಾಗಿ ನಿಮ್ಮ ವಿನಂತಿ ಬುಕ್ ಆಗಿದೆ. ನಮ್ಮ ತಂಡವು ನಿಮಗೆ ಕರೆ ಮಾಡುತ್ತದೆ.\nಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ: www.mechwealth.com` : `Thank you, ${msg}! 🙏\nYour request for ${s.context} is booked. Our team will call you.\nLearn more here: www.mechwealth.com`;
-    return Response.json({ text: thanks });
+    if (sent) {
+      const thanks = s.lang === "hi" ? `धन्यवाद, ${visitorName}! 🙏\n${s.context} के लिए आपका अनुरोध बुक हो गया है। हमारी टीम आपको ${phoneDigits} पर कॉल करेगी।\nऔर जानें: www.mechwealth.com` : s.lang === "kn" ? `ಧನ್ಯವಾದಗಳು, ${visitorName}! 🙏\n${s.context} ಗಾಗಿ ನಿಮ್ಮ ವಿನಂತಿ ಬುಕ್ ಆಗಿದೆ. ನಮ್ಮ ತಂಡವು ${phoneDigits} ಗೆ ಕರೆ ಮಾಡುತ್ತದೆ.\nಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ: www.mechwealth.com` : `Thank you, ${visitorName}! 🙏\nYour request for ${s.context} is booked. Our team will call you on ${phoneDigits}.\nLearn more here: www.mechwealth.com`;
+      return Response.json({ text: thanks });
+    } else {
+      // Honest failure - do not claim booked
+      return Response.json({ text: `Thanks, ${visitorName}. We received your details for ${s.context}, but we could not notify our team automatically right now. Please message us directly on WhatsApp at www.mechwealth.com so we don't miss you.` });
+    }
   }
 
   const m = menuText(s.lang);

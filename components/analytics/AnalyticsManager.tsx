@@ -88,9 +88,10 @@ export default function AnalyticsManager({ enableVercel }: { enableVercel: boole
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-lg text-cream-100">Your privacy choices</h2>
             <p className="mt-2 text-sm leading-6 text-copy-secondary">
-              We use optional Google Analytics cookies to understand visits and improve the site.
-              Vercel provides anonymous, cookieless traffic and performance measurements. You can
-              accept or reject Google Analytics and change this choice later.
+              With your permission, we use Google Analytics cookies to understand visits and
+              improve the website. You can accept or reject these optional cookies and change
+              your choice at any time using Cookie preferences in the footer. Rejecting analytics
+              does not limit your access to the website.
             </p>
           </div>
           <div className="mt-5 flex shrink-0 flex-wrap gap-3 sm:mt-0">

@@ -52,12 +52,10 @@ export default function PrivacyPage() {
           approximate location, device and browser information and a cookie-based client
           identifier. Google Analytics is not loaded before you accept.
         </p>
-        <h3>Vercel hosting and measurement</h3>
+        <h3>Website hosting</h3>
         <p>
-          Vercel hosts the website and may process normal request and security information needed
-          to deliver it. Vercel Web Analytics uses anonymised, cookieless measurements. Vercel
-          Speed Insights receives route, device, network and Web Vitals information that is not
-          tied to an identifiable visitor or browsing session.
+          The website is hosted on GoDaddy. The hosting provider may process request and security
+          information needed to deliver and protect the website.
         </p>
 
         <h2>Why we use this data</h2>
@@ -80,7 +78,8 @@ export default function PrivacyPage() {
         <h2>Sharing and international processing</h2>
         <p>
           Data is shared only where needed with service providers that support hosting, security,
-          analytics or enquiry handling, including Vercel and—only after consent—Google Analytics.
+          analytics or enquiry handling, including GoDaddy for hosting, Resend for enquiry emails
+          and—only after consent—Google Analytics.
           These providers may process information outside India under their own data-processing
           terms. We do not sell personal data.
         </p>

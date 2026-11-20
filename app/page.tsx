@@ -5,6 +5,7 @@ import AcademyPrograms from "@/components/sections/AcademyPrograms";
 import TradingMindset from "@/components/sections/TradingMindset";
 import IndianMarkets from "@/components/sections/IndianMarkets";
 import Mentor from "@/components/sections/Mentor";
+import Reviews from "@/components/sections/Reviews";
 import FinalCta from "@/components/sections/FinalCta";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/seo";
@@ -31,6 +32,8 @@ export default function Home() {
         </section>
 
         <Mentor />
+
+        <Reviews />
 
         <TechnicalAnalysis />
 

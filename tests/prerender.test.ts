@@ -51,6 +51,20 @@ describe("course selection initial HTML (requires a completed production build)"
 });
 
 describe("prerendered routes (requires a completed production build)", () => {
+  it("places six labelled sample review cards after the founder with a crawlable Google link", () => {
+    const document = new DOMParser().parseFromString(htmlFor("/")!, "text/html");
+    const reviews = document.querySelector("#reviews")!;
+    expect(reviews).not.toBeNull();
+    expect(reviews.previousElementSibling?.id).toBe("mentor");
+    expect(reviews.querySelectorAll("article")).toHaveLength(6);
+    expect(reviews.textContent).toContain("Actual customer reviews will replace these cards");
+    expect(reviews.querySelector('a[href="https://share.google/MgfrDkMIV4qc46HFq"]')?.textContent).toContain("Read more reviews");
+    for (const card of reviews.querySelectorAll("article")) {
+      expect(card.textContent).toContain("Not a customer review");
+    }
+  });
+
+
   it.each(SITE_ROUTES)("renders all confirmed social links in the shared footer on $path", (route) => {
     const document = new DOMParser().parseFromString(htmlFor(route.path)!, "text/html");
     expect(document.querySelectorAll("footer")).toHaveLength(1);

@@ -11,7 +11,7 @@ export const siteConfig = {
   socialLinks: [
     "https://www.instagram.com/mechwealth_academy/",
     "https://www.facebook.com/mechwealthacademy",
-    "https://www.youtube.com/@MechWealth",
+    "https://www.youtube.com/@mechwealth26",
   ],
   privacyEmail: "info@mechwealth.com",
   nav: [

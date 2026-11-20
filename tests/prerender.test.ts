@@ -102,7 +102,7 @@ describe("prerendered routes (requires a completed production build)", () => {
     for (const [name, href] of [
       ["Instagram", "https://www.instagram.com/mechwealth_academy/"],
       ["Facebook", "https://www.facebook.com/mechwealthacademy"],
-      ["YouTube", "https://www.youtube.com/@MechWealth"],
+      ["YouTube", "https://www.youtube.com/@mechwealth26"],
     ]) {
       const link = socials!.querySelector(`a[href="${href}"]`);
       expect(link, `${route.path}: missing ${name}`).not.toBeNull();

@@ -6,7 +6,7 @@ export const REVIEWS = [
     name: "Deepak Shintre",
     rating: 5,
     dateLabel: "4 years ago",
-    text: "Hey, STOCKPUNTERS - you are very professional at what you do. In one sentence: you treat your clients’ money as your own and handle it accordingly. You make sure gains are maximised and losses are minimised. This is a great quality that I have not seen in many share-market training institutes or trainers. I wish you all the very best. May you continue helping people create wealth and make their fortunes.\n\nI recommend STOCKPUNTERS to anyone keen on investing in the share market.",
+    text: "Hey, MECHWEALTH - you are very professional at what you do. In one sentence: you treat your clients’ money as your own and handle it accordingly. You make sure gains are maximised and losses are minimised. This is a great quality that I have not seen in many share-market training institutes or trainers. I wish you all the very best. May you continue helping people create wealth and make their fortunes.\n\nI recommend MECHWEALTH to anyone keen on investing in the share market.",
   },
   {
     name: "Annachar Adya sir",

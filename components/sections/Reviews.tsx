@@ -42,7 +42,7 @@ export default function Reviews() {
   return (
     <section id="reviews" aria-labelledby="reviews-heading" aria-roledescription="carousel" className="relative border-t border-white/5 py-24 sm:py-32">
       <Container>
-        <div className="flex flex-col items-start justify-between gap-7 lg:flex-row lg:gap-12">
+        <div className="flex flex-col items-start justify-between gap-7 lg:flex-row lg:items-stretch lg:gap-12">
           <div className="min-w-0">
             <SectionHeading
               align="left"

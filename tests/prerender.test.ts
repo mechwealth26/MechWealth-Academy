@@ -58,11 +58,16 @@ describe("prerendered routes (requires a completed production build)", () => {
     expect(reviews).not.toBeNull();
     expect(reviews.previousElementSibling?.id).toBe("mentor");
     expect(reviews.querySelectorAll("article")).toHaveLength(6);
-    expect(reviews.textContent).toContain("added manually and lightly edited for grammar and spelling");
+    expect(reviews.textContent).toContain("Selected customer reviews, added manually.");
     expect(reviews.querySelector('a[href="https://share.google/MgfrDkMIV4qc46HFq"]')?.textContent).toContain("Read more reviews");
     for (const review of REVIEWS) {
       expect(reviews.textContent).toContain(review.name);
-      expect(reviews.textContent).toContain(review.text);
+      const card = Array.from(reviews.querySelectorAll("article")).find((element) => element.textContent?.includes(review.name))!;
+      const text = card.querySelector("blockquote p")!.textContent!;
+      expect(Array.from(text).length).toBeLessThanOrEqual(191);
+      expect(text).not.toMatch(/[“”\u2014]/);
+      expect(review.text.replace(/\s+/g, " ").startsWith(text.replace(/\.\.\.$/, ""))).toBe(true);
+      if (Array.from(review.text).length <= 191) expect(text).toBe(review.text);
       expect(reviews.textContent).toContain(review.dateLabel);
     }
     expect(reviews.textContent).not.toContain("Rating pending");

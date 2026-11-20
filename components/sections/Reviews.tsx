@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { buttonClasses } from "@/lib/buttonStyles";
-import { GOOGLE_REVIEWS_URL, REVIEWS } from "@/data/reviews";
+import { GOOGLE_REVIEWS_URL, REVIEWS, reviewPreview } from "@/data/reviews";
 import styles from "./Reviews.module.css";
 
 export default function Reviews() {
@@ -49,7 +49,7 @@ export default function Reviews() {
               align="left"
               eyebrow="Reviews"
               title={<span id="reviews-heading">Their experience.<br />In their words.</span>}
-              description="Selected customer reviews, added manually and lightly edited for grammar and spelling. Read the original feedback on Google."
+              description="Selected customer reviews, added manually. Read the original feedback on Google."
             />
           </div>
           <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:mt-9 lg:w-auto lg:shrink-0 lg:flex-col lg:items-end">
@@ -77,7 +77,7 @@ export default function Reviews() {
           className={`${styles.track} mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400`}
         >
           {REVIEWS.map((review, index) => (
-            <article key={review.name} aria-label={`Review by ${review.name}, ${index + 1} of ${REVIEWS.length}`} aria-roledescription="slide" className="group relative flex min-w-0 basis-full shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-ink-850 to-ink-900 p-6 transition-colors duration-300 hover:border-gold-500/40 motion-reduce:transition-none sm:p-8 md:basis-[calc((100%_-_1.25rem)/2)] xl:basis-[calc((100%_-_2.5rem)/3)]">
+            <article key={review.name} aria-label={`Review by ${review.name}, ${index + 1} of ${REVIEWS.length}`} aria-roledescription="slide" className="group relative flex min-w-0 basis-full shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-ink-850 to-ink-900 p-5 transition-colors duration-300 hover:border-gold-500/40 motion-reduce:transition-none sm:p-6 md:basis-[calc((100%_-_1.25rem)/2)] xl:basis-[calc((100%_-_2.5rem)/3)]">
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent" />
               <header className="flex items-center gap-3">
                 <div aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold-500/30 bg-gradient-to-br from-gold-500/20 to-gold-500/5 font-display text-base font-medium text-gold-400">
@@ -88,7 +88,7 @@ export default function Reviews() {
                   <p className="mt-1 text-xs text-copy-muted">{review.dateLabel}</p>
                 </div>
               </header>
-              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
                 <div aria-hidden="true" className="flex gap-1 text-gold-500">
                   {[0, 1, 2, 3, 4].map((star) => (
                     <svg key={star} viewBox="0 0 24 24" fill={star < review.rating ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.4" className="h-4 w-4"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" strokeLinejoin="round" /></svg>
@@ -96,18 +96,15 @@ export default function Reviews() {
                 </div>
                 <span className="text-xs text-copy-muted" aria-label={`${review.rating} out of 5 stars`}>{review.rating}/5</span>
               </div>
-              <blockquote className="mb-7 mt-5 flex-1">
-                <p id={`review-text-${index}`} className={`whitespace-pre-line text-base leading-relaxed text-copy-secondary ${expandedName === review.name ? "" : "line-clamp-6"}`}>“{review.text}”</p>
-                {review.text.length > 300 && (
+              <blockquote className="mt-4 flex-1">
+                <p id={`review-text-${index}`} className="whitespace-pre-line text-base leading-relaxed text-copy-secondary">{expandedName === review.name ? review.text : reviewPreview(review.text)}</p>
+                {Array.from(review.text.replace(/\s+/g, " ").trim()).length > 191 && (
                   <button type="button" aria-expanded={expandedName === review.name} aria-controls={`review-text-${index}`} aria-label={`${expandedName === review.name ? "Collapse" : "Read full"} review by ${review.name}`} onClick={() => setExpandedName(expandedName === review.name ? null : review.name)} className="mt-3 min-h-11 text-sm font-medium text-gold-400 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400">
                     {expandedName === review.name ? "Show less" : "Read full review"}
                   </button>
                 )}
               </blockquote>
-              <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] pt-5">
-                <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-copy-muted">Edited for grammar & spelling</p>
-                <span aria-hidden="true" className="font-display text-3xl leading-none text-gold-500/40">”</span>
-              </div>
+
             </article>
           ))}
         </div>

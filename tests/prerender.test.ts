@@ -52,6 +52,14 @@ describe("course selection initial HTML (requires a completed production build)"
 });
 
 describe("prerendered routes (requires a completed production build)", () => {
+  it("permanently redirects the legacy technical-analysis URL to Courses", () => {
+    const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
+    const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === "/training/technical-analysis-course");
+    expect(redirect).toMatchObject({ destination: "/courses", statusCode: 308 });
+    expect(new RegExp(redirect.regex).test("/training/technical-analysis-course")).toBe(true);
+    expect(new RegExp(redirect.regex).test("/training/unrelated-page")).toBe(false);
+  });
+
   it("places six supplied reviews after the founder with a crawlable Google link", () => {
     const document = new DOMParser().parseFromString(htmlFor("/")!, "text/html");
     const reviews = document.querySelector("#reviews")!;

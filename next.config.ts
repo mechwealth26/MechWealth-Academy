@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   // Production origin is env-driven (see data/site.ts / SEO fix S-05)
   reactStrictMode: true,
+  async redirects() {
+    return [{
+      source: "/training/technical-analysis-course",
+      destination: "/courses",
+      permanent: true,
+    }];
+  },
   async headers() {
     const immutableAssetHeaders = [
       { key: "Cache-Control", value: "public, max-age=31536000, immutable" },

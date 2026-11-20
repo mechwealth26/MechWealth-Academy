@@ -60,6 +60,14 @@ describe("prerendered routes (requires a completed production build)", () => {
     expect(new RegExp(redirect.regex).test("/training/unrelated-page")).toBe(false);
   });
 
+  it("permanently redirects the legacy Terms URL without redirecting unrelated legal URLs", () => {
+    const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
+    const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === "/legal/terms-of-use");
+    expect(redirect).toMatchObject({ destination: "/terms", statusCode: 308 });
+    expect(new RegExp(redirect.regex).test("/legal/terms-of-use")).toBe(true);
+    expect(new RegExp(redirect.regex).test("/legal/unrelated-page")).toBe(false);
+  });
+
   it("places six supplied reviews after the founder with a crawlable Google link", () => {
     const document = new DOMParser().parseFromString(htmlFor("/")!, "text/html");
     const reviews = document.querySelector("#reviews")!;

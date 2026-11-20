@@ -21,11 +21,18 @@ const nextConfig: NextConfig = {
   // Production origin is env-driven (see data/site.ts / SEO fix S-05)
   reactStrictMode: true,
   async redirects() {
-    return [{
-      source: "/training/technical-analysis-course",
-      destination: "/courses",
-      permanent: true,
-    }];
+    return [
+      {
+        source: "/training/technical-analysis-course",
+        destination: "/courses",
+        permanent: true,
+      },
+      {
+        source: "/legal/terms-of-use",
+        destination: "/terms",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     const immutableAssetHeaders = [

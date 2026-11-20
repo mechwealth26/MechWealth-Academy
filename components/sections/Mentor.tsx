@@ -45,9 +45,6 @@ export default function Mentor() {
               />
             ))}
           </div>
-          <figcaption className="mt-3 font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-copy-muted md:col-start-1 md:row-start-2 md:mt-0">
-            {founder.portraitCaption}
-          </figcaption>
         </figure>
 
         {/* Story + credentials */}

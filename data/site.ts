@@ -40,8 +40,6 @@ export const siteConfig = {
     headline: "One person teaches every session. This is him.",
     bio: "I'm Kirankumar Kajagar. I hold an MTech in Mechanical Engineering from VTU Belagavi, and I don't practise engineering. What I kept from it is the method — study the facts, follow a process, test the thing before you deploy it. I teach markets that way.",
     initials: "KK",
-    // Displayed by the founder profile in components/sections/Mentor.tsx.
-    portraitCaption: "FIG. 02 — Shikarkhane Road, Vijayapura",
     credentials: [
       {
         label: "Mutual Funds · AMFI",

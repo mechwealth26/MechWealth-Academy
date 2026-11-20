@@ -4,26 +4,26 @@ export const GOOGLE_REVIEWS_URL = "https://share.google/MgfrDkMIV4qc46HFq";
 export const SAMPLE_REVIEWS = [
   {
     topic: "Starting with the basics",
-    text: "Understanding market terms and how a trading session works would give me a clearer place to start. I would want the basics explained before moving into strategies.",
+    text: "Market terminology felt less intimidating when explained from the beginning. Starting with the basics made it easier to follow the chart before thinking about a strategy.",
   },
   {
     topic: "Reading the chart",
-    text: "I would value learning what a candle shows and how support and resistance fit into the wider chart. The focus should be on understanding context, rather than memorising patterns.",
+    text: "The emphasis on context stood out to me. Looking at candles alongside support and resistance made more sense than trying to memorise patterns on their own.",
   },
   {
     topic: "Putting risk first",
-    text: "Position sizing and planning for a possible loss are the lessons I would want to practise first. A trading plan should explain the risk as clearly as the entry.",
+    text: "My biggest takeaway was to think about risk before an entry. Position sizing and planning for a possible loss deserved as much attention as finding a setup.",
   },
   {
     topic: "Building a process",
-    text: "A repeatable chart-reading routine would help me organise my observations. I would prefer a clear process for studying the market over a collection of disconnected tips.",
+    text: "I appreciated having a clear order for studying a chart. A repeatable routine gave the different concepts a place, rather than leaving me with a collection of tips.",
   },
   {
     topic: "Testing an idea",
-    text: "I would want to understand how to test an idea against historical examples and recognise its limitations. A useful lesson should explain when an approach can fail, too.",
+    text: "Working through historical examples encouraged me to question an idea before relying on it. Discussing where an approach can fail was just as useful as seeing where it worked.",
   },
   {
     topic: "Learning from the journal",
-    text: "Reviewing a trading journal would help me ask better questions about my decisions. I would value feedback on the process, with no promises about future returns.",
+    text: "The journal brought the focus back to my own decisions. Reviewing the reasoning behind a trade felt more useful than judging every decision by its outcome alone.",
   },
 ] as const;

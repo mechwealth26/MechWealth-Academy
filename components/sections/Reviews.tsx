@@ -69,14 +69,36 @@ export default function Reviews() {
           className="mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain pb-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400"
         >
           {SAMPLE_REVIEWS.map((review, index) => (
-            <article key={review.topic} aria-label={`Sample review ${index + 1} of ${SAMPLE_REVIEWS.length}`} aria-roledescription="slide" className="group flex min-w-0 basis-full shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-ink-900/60 p-6 transition-colors duration-300 hover:border-gold-500/40 motion-reduce:transition-none sm:p-8 md:basis-[calc((100%_-_1.25rem)/2)] xl:basis-[calc((100%_-_2.5rem)/3)]">
-              <div className="flex items-center justify-between gap-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-500">Sample {String(index + 1).padStart(2, "0")}</p>
-                <span aria-hidden="true" className="font-display text-4xl leading-none text-gold-500/40">“</span>
+            <article key={review.topic} aria-label={`Sample review ${index + 1} of ${SAMPLE_REVIEWS.length}`} aria-roledescription="slide" className="group relative flex min-w-0 basis-full shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-ink-850 to-ink-900 p-6 transition-colors duration-300 hover:border-gold-500/40 motion-reduce:transition-none sm:p-8 md:basis-[calc((100%_-_1.25rem)/2)] xl:basis-[calc((100%_-_2.5rem)/3)]">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent" />
+              <header className="flex items-center gap-3">
+                <div role="img" aria-label={`Placeholder avatar for sample reviewer ${index + 1}`} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold-500/30 bg-gradient-to-br from-gold-500/20 to-gold-500/5 text-gold-400">
+                  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-7 w-7">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <p className="font-display text-base font-medium text-cream-100">Sample reviewer {String(index + 1).padStart(2, "0")}</p>
+                  <p className="mt-1 text-xs text-copy-muted">Reviewer details pending</p>
+                </div>
+              </header>
+              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <div aria-hidden="true" className="flex gap-1 text-gold-500/60">
+                  {[0, 1, 2, 3, 4].map((star) => (
+                    <svg key={star} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-4 w-4"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" strokeLinejoin="round" /></svg>
+                  ))}
+                </div>
+                <span className="text-xs text-copy-muted">Rating pending</span>
               </div>
-              <h3 className="mt-5 font-display text-xl font-medium text-cream-100">{review.topic}</h3>
-              <p className="mb-8 mt-4 text-base leading-relaxed text-copy-secondary">{review.text}</p>
-              <p className="mt-auto border-t border-white/[0.08] pt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-copy-muted">Illustrative copy · Not a customer review</p>
+              <blockquote className="mb-7 mt-5 flex-1">
+                <h3 className="font-display text-xl font-medium leading-snug text-cream-100">“{review.topic}”</h3>
+                <p className="mt-4 text-base leading-relaxed text-copy-secondary">{review.text}</p>
+              </blockquote>
+              <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] pt-5">
+                <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-copy-muted">Illustrative copy · Not a customer review</p>
+                <span aria-hidden="true" className="font-display text-3xl leading-none text-gold-500/40">”</span>
+              </div>
             </article>
           ))}
         </div>

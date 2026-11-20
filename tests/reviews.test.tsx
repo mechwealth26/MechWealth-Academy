@@ -24,6 +24,10 @@ describe("sample review carousel", () => {
     render(<Reviews />);
     const section = screen.getByRole("region", { name: /Their experience/ });
     expect(within(section).getAllByRole("article")).toHaveLength(6);
+    expect(within(section).getAllByRole("img", { name: /Placeholder avatar for sample reviewer/ })).toHaveLength(6);
+    expect(within(section).getAllByText("Rating pending")).toHaveLength(6);
+    expect(within(section).getAllByText("Reviewer details pending")).toHaveLength(6);
+    expect(section.querySelectorAll("blockquote")).toHaveLength(6);
     expect(within(section).getAllByText(/Not a customer review/)).toHaveLength(6);
     expect(section.textContent).toContain("Actual customer reviews will replace these cards");
     const link = within(section).getByRole("link", { name: /Read more reviews/ });

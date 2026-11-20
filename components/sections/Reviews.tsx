@@ -5,6 +5,7 @@ import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { buttonClasses } from "@/lib/buttonStyles";
 import { GOOGLE_REVIEWS_URL, SAMPLE_REVIEWS } from "@/data/reviews";
+import styles from "./Reviews.module.css";
 
 export default function Reviews() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -50,10 +51,16 @@ export default function Reviews() {
               description="Sample content for layout preview. Actual customer reviews will replace these cards."
             />
           </div>
-          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={buttonClasses("secondary", "md", "shrink-0 whitespace-nowrap lg:mt-9")}>
+          <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:mt-9 lg:w-auto lg:shrink-0 lg:flex-col lg:items-end">
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={buttonClasses("secondary", "md", "shrink-0 whitespace-nowrap")}>
             Read more reviews <span aria-hidden="true">↗</span>
             <span className="sr-only"> on Google (opens in a new tab)</span>
           </a>
+          <div className="ml-auto flex gap-3" aria-label="Review carousel controls">
+            <button type="button" aria-label="Previous reviews" aria-controls="review-cards" disabled={edges.start} onClick={() => move(-1)} className={buttonClasses("secondary", "sm", "w-11 px-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400")}><span aria-hidden="true">←</span></button>
+            <button type="button" aria-label="Next reviews" aria-controls="review-cards" disabled={edges.end} onClick={() => move(1)} className={buttonClasses("secondary", "sm", "w-11 px-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400")}><span aria-hidden="true">→</span></button>
+          </div>
+          </div>
         </div>
 
         <div
@@ -66,7 +73,7 @@ export default function Reviews() {
             event.preventDefault();
             move(event.key === "ArrowRight" ? 1 : -1);
           }}
-          className="mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain pb-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400"
+          className={`${styles.track} mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400`}
         >
           {SAMPLE_REVIEWS.map((review, index) => (
             <article key={review.topic} aria-label={`Sample review ${index + 1} of ${SAMPLE_REVIEWS.length}`} aria-roledescription="slide" className="group relative flex min-w-0 basis-full shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-ink-850 to-ink-900 p-6 transition-colors duration-300 hover:border-gold-500/40 motion-reduce:transition-none sm:p-8 md:basis-[calc((100%_-_1.25rem)/2)] xl:basis-[calc((100%_-_2.5rem)/3)]">
@@ -103,13 +110,7 @@ export default function Reviews() {
           ))}
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-5">
-          <p className="text-sm text-copy-muted">Six sample cards · Swipe or use the arrows to explore</p>
-          <div className="flex gap-3" aria-label="Review carousel controls">
-            <button type="button" aria-label="Previous reviews" aria-controls="review-cards" disabled={edges.start} onClick={() => move(-1)} className={buttonClasses("secondary", "sm", "w-11 px-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400")}><span aria-hidden="true">←</span></button>
-            <button type="button" aria-label="Next reviews" aria-controls="review-cards" disabled={edges.end} onClick={() => move(1)} className={buttonClasses("secondary", "sm", "w-11 px-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400")}><span aria-hidden="true">→</span></button>
-          </div>
-        </div>
+        <p className="mt-5 text-sm text-copy-muted">Six sample cards · Swipe or use the arrows to explore</p>
       </Container>
     </section>
   );

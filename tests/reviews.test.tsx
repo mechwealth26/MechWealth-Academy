@@ -28,6 +28,9 @@ describe("sample review carousel", () => {
     expect(within(section).getAllByText("Rating pending")).toHaveLength(6);
     expect(within(section).getAllByText("Reviewer details pending")).toHaveLength(6);
     expect(section.querySelectorAll("blockquote")).toHaveLength(6);
+    const controls = within(section).getByLabelText("Review carousel controls");
+    const track = within(section).getByLabelText(/Sample review cards/);
+    expect(controls.compareDocumentPosition(track) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(section).getAllByText(/Not a customer review/)).toHaveLength(6);
     expect(section.textContent).toContain("Actual customer reviews will replace these cards");
     const link = within(section).getByRole("link", { name: /Read more reviews/ });

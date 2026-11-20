@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import ResourceArticleBody from "@/components/resources/ResourceArticleBody";
 import { absoluteUrl } from "@/lib/seo";
 import { COURSE_STAGES } from "@/data/courses";
+import { REVIEWS } from "@/data/reviews";
 
 /**
  * Prerender smoke (T-07): after `next build`, every indexable route's static
@@ -51,17 +52,20 @@ describe("course selection initial HTML (requires a completed production build)"
 });
 
 describe("prerendered routes (requires a completed production build)", () => {
-  it("places six labelled sample review cards after the founder with a crawlable Google link", () => {
+  it("places six supplied reviews after the founder with a crawlable Google link", () => {
     const document = new DOMParser().parseFromString(htmlFor("/")!, "text/html");
     const reviews = document.querySelector("#reviews")!;
     expect(reviews).not.toBeNull();
     expect(reviews.previousElementSibling?.id).toBe("mentor");
     expect(reviews.querySelectorAll("article")).toHaveLength(6);
-    expect(reviews.textContent).toContain("Actual customer reviews will replace these cards");
+    expect(reviews.textContent).toContain("added manually and lightly edited for grammar and spelling");
     expect(reviews.querySelector('a[href="https://share.google/MgfrDkMIV4qc46HFq"]')?.textContent).toContain("Read more reviews");
-    for (const card of reviews.querySelectorAll("article")) {
-      expect(card.textContent).toContain("Not a customer review");
+    for (const review of REVIEWS) {
+      expect(reviews.textContent).toContain(review.name);
+      expect(reviews.textContent).toContain(review.text);
+      expect(reviews.textContent).toContain(review.dateLabel);
     }
+    expect(reviews.textContent).not.toContain("Rating pending");
   });
 
 

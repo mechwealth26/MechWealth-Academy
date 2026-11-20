@@ -1,29 +1,41 @@
-// Illustrative layout copy only; replace with owner-supplied, authorised reviews.
+// Owner-supplied reviews. Grammar/spelling edited; ratings and displayed dates are supplied values.
 export const GOOGLE_REVIEWS_URL = "https://share.google/MgfrDkMIV4qc46HFq";
 
-export const SAMPLE_REVIEWS = [
+export const REVIEWS = [
   {
-    topic: "Starting with the basics",
-    text: "Market terminology felt less intimidating when explained from the beginning. Starting with the basics made it easier to follow the chart before thinking about a strategy.",
+    name: "Deepak Shintre",
+    rating: 5,
+    dateLabel: "4 years ago",
+    text: "Hey, STOCKPUNTERS—you are very professional at what you do. In one sentence: you treat your clients’ money as your own and handle it accordingly. You make sure gains are maximised and losses are minimised. This is a great quality that I have not seen in many share-market training institutes or trainers. I wish you all the very best. May you continue helping people create wealth and make their fortunes.\n\nI recommend STOCKPUNTERS to anyone keen on investing in the share market.",
   },
   {
-    topic: "Reading the chart",
-    text: "The emphasis on context stood out to me. Looking at candles alongside support and resistance made more sense than trying to memorise patterns on their own.",
+    name: "Annachar Adya sir",
+    rating: 5,
+    dateLabel: "2 years ago",
+    text: "The best service I have experienced. They made it very easy to recover my shares that had gone to the IEPF. Excellent investment suggestions too—keep it up!",
   },
   {
-    topic: "Putting risk first",
-    text: "My biggest takeaway was to think about risk before an entry. Position sizing and planning for a possible loss deserved as much attention as finding a setup.",
+    name: "Renuka Talawar",
+    rating: 4,
+    dateLabel: "3 years ago",
+    text: "It helped me understand how to pick stocks for investment and day trading. The teaching method is very simple and interesting. 😊😊😊",
   },
   {
-    topic: "Building a process",
-    text: "I appreciated having a clear order for studying a chart. A repeatable routine gave the different concepts a place, rather than leaving me with a collection of tips.",
+    name: "Amit Uppin",
+    rating: 4,
+    dateLabel: "2 years ago",
+    text: "It helped me understand how to pick stocks for investment and day trading. The teaching method is very simple and interesting. 😊😊😊",
   },
   {
-    topic: "Testing an idea",
-    text: "Working through historical examples encouraged me to question an idea before relying on it. Discussing where an approach can fail was just as useful as seeing where it worked.",
+    name: "Mahantesh Halasangi",
+    rating: 5,
+    dateLabel: "4 years ago",
+    text: "The best teacher and mentor I have come across. I have learned a lot that has helped me become profitable in trading. The best institute in North Karnataka.",
   },
   {
-    topic: "Learning from the journal",
-    text: "The journal brought the focus back to my own decisions. Reviewing the reasoning behind a trade felt more useful than judging every decision by its outcome alone.",
+    name: "Aravind Math",
+    rating: 5,
+    dateLabel: "4 years ago",
+    text: "Excellent, profitable and multibagger trading and investment calls. Superb research, sir!",
   },
 ] as const;

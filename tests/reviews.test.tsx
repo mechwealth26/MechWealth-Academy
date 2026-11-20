@@ -1,12 +1,13 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Reviews from "@/components/sections/Reviews";
+import { REVIEWS } from "@/data/reviews";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 function measuredTrack() {
   render(<Reviews />);
-  const track = screen.getByLabelText(/Sample review cards/);
+  const track = screen.getByLabelText(/Customer review cards/);
   Object.defineProperties(track, {
     clientWidth: { configurable: true, value: 600 },
     scrollWidth: { configurable: true, value: 1900 },
@@ -19,26 +20,47 @@ function measuredTrack() {
   return track;
 }
 
-describe("sample review carousel", () => {
-  it("labels all six samples and exposes the Google action before the cards", () => {
+describe("customer review carousel", () => {
+  it("shows the six supplied names, ratings, dates and edited text with the Google action above the cards", () => {
     render(<Reviews />);
     const section = screen.getByRole("region", { name: /Their experience/ });
     expect(within(section).getAllByRole("article")).toHaveLength(6);
-    expect(within(section).getAllByRole("img", { name: /Placeholder avatar for sample reviewer/ })).toHaveLength(6);
-    expect(within(section).getAllByText("Rating pending")).toHaveLength(6);
-    expect(within(section).getAllByText("Reviewer details pending")).toHaveLength(6);
+    const cards = within(section).getAllByRole("article");
+    expect(REVIEWS.map((review) => review.name)).toEqual(["Deepak Shintre", "Annachar Adya sir", "Renuka Talawar", "Amit Uppin", "Mahantesh Halasangi", "Aravind Math"]);
+    expect(REVIEWS.map((review) => review.rating)).toEqual([5, 5, 4, 4, 5, 5]);
+    for (const [index, review] of REVIEWS.entries()) {
+      expect(cards[index].textContent).toContain(review.name);
+      expect(cards[index].textContent).toContain(review.dateLabel);
+      expect(cards[index].textContent).toContain(review.text);
+      expect(within(cards[index]).getByLabelText(`${review.rating} out of 5 stars`)).toBeTruthy();
+      expect(cards[index].querySelectorAll('svg[fill="currentColor"]')).toHaveLength(review.rating);
+    }
     expect(section.querySelectorAll("blockquote")).toHaveLength(6);
     const controls = within(section).getByLabelText("Review carousel controls");
-    const track = within(section).getByLabelText(/Sample review cards/);
+    const track = within(section).getByLabelText(/Customer review cards/);
     expect(controls.compareDocumentPosition(track) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(section).getAllByText(/Not a customer review/)).toHaveLength(6);
-    expect(section.textContent).toContain("Actual customer reviews will replace these cards");
+    expect(section.textContent).not.toMatch(/Sample reviewer|Rating pending|Illustrative copy/);
+    expect(within(section).getAllByText("Edited for grammar & spelling")).toHaveLength(6);
+    expect(section.textContent).toContain("STOCKPUNTERS is the previous name of MECHWEALTH");
+    expect(section.textContent).toContain("not guaranteed or typical results");
     const link = within(section).getByRole("link", { name: /Read more reviews/ });
     expect(link.getAttribute("href")).toBe("https://share.google/MgfrDkMIV4qc46HFq");
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.getAttribute("rel")).toBe("noopener noreferrer");
     expect(link.compareDocumentPosition(within(section).getAllByRole("article")[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(section.querySelector('[itemtype*="Review"]')).toBeNull();
+  });
+
+  it("lets readers expand and collapse the long review without changing its text", () => {
+    render(<Reviews />);
+    const expand = screen.getByRole("button", { name: "Read full review by Deepak Shintre" });
+    expect(expand.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(expand);
+    const collapse = screen.getByRole("button", { name: "Collapse review by Deepak Shintre" });
+    expect(collapse.getAttribute("aria-expanded")).toBe("true");
+    expect(document.getElementById(collapse.getAttribute("aria-controls")!)?.textContent).toContain(REVIEWS[0].text);
+    fireEvent.click(collapse);
+    expect(screen.getByRole("button", { name: "Read full review by Deepak Shintre" }).getAttribute("aria-expanded")).toBe("false");
   });
 
   it("moves one card with buttons or keyboard and disables the controls at each edge", () => {

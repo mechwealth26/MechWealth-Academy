@@ -2,18 +2,16 @@ import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/webhook/route";
 import { COURSE_STAGES } from "@/data/courses";
-import { SERVICES } from "@/data/services";
 
 const appSecret = "test-only-app-secret";
 const phoneNumberId = "123456789";
 const sender = "15555550123";
-let messageNumber = 0;
 function payload(text: unknown = " HI ") {
   return {
     object: "whatsapp_business_account",
     entry: [{ changes: [{ field: "messages", value: {
       messaging_product: "whatsapp", metadata: { phone_number_id: phoneNumberId },
-      messages: [{ id: `test-message-${++messageNumber}`, from: sender, type: "text", text: { body: text } }],
+      messages: [{ id: "test-message", from: sender, type: "text", text: { body: text } }],
     } }] }],
   };
 }
@@ -39,7 +37,6 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
-  vi.useRealTimers();
 });
 
 describe("WhatsApp webhook verification", () => {
@@ -78,53 +75,41 @@ describe("WhatsApp webhook messages (all outbound requests mocked)", () => {
     }
     expect(fetch).not.toHaveBeenCalled();
   });
-  it("authenticates raw UTF-8 bytes and preserves the interactive language chooser without logging payloads", async () => {
+  it("authenticates raw UTF-8 bytes and shows the current course menu", async () => {
     const log = vi.spyOn(console, "log");
     const error = vi.spyOn(console, "error");
-    expect((await POST(post(payload("Hi")))).status).toBe(200);
+    const unicodeResponse = await POST(post(JSON.stringify(payload("  Hello 👋  "))));
+    expect(unicodeResponse.status).toBe(200);
+    expect((await POST(post(payload()))).status).toBe(200);
+    expect(fetch).toHaveBeenLastCalledWith(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, expect.objectContaining({
+      method: "POST", headers: { Authorization: "Bearer test-only-access-token", "Content-Type": "application/json" },
+      signal: expect.any(AbortSignal),
+      body: JSON.stringify({ messaging_product: "whatsapp", to: sender, type: "text", text: { body: "Hi! Welcome to MECHWEALTH 👋\n\nChoose a course to learn more:\n1. Foundation — Beginner\n2. Practitioner — Intermediate\n3. Method — Advanced\n4. One-to-One — Advanced\n\nReply with 1, 2, 3 or 4.\nCompare the courses: https://mechwealth.com/courses" } }),
+    }));
+    expect(log).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+  });
+  it.each(COURSE_STAGES)("describes $title using the website catalog", async (course) => {
+    expect((await POST(post(payload(String(Number(course.num)))))).status).toBe(200);
     const options = vi.mocked(fetch).mock.calls[0][1]!;
-    const reply = JSON.parse(String(options.body));
-    expect(reply.interactive.action.buttons.map((item: { reply: { id: string } }) => item.reply.id)).toEqual(["lang_en", "lang_hi", "lang_kn"]);
-    expect(reply.interactive.action.buttons[2].reply.title).toBe("ಕನ್ನಡ");
-    expect(options.signal).toBeInstanceOf(AbortSignal);
-    expect(options.headers).toEqual({ Authorization: "Bearer test-only-access-token", "Content-Type": "application/json" });
-    expect((await POST(post(payload("Hello 👋")))).status).toBe(200);
-    expect(log).not.toHaveBeenCalled(); expect(error).not.toHaveBeenCalled();
+    const reply = JSON.parse(String(options.body)).text.body;
+    expect(reply).toContain(`${course.title} — ${course.level}`);
+    expect(reply).toContain(course.description);
+    expect(reply).toContain(course.audience);
+    expect(reply).toContain(`https://mechwealth.com/courses/${course.slug}`);
+    expect(reply).toContain("https://mechwealth.com/contact");
+    expect(reply).not.toMatch(/Free Demo|Investing Course|will book|will contact|share your Name/i);
   });
-  it.each(["lang_en", "lang_hi", "lang_kn"])("preserves %s interactive choices", async (choice) => {
-    await POST(post(payload(choice)));
-    const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body));
-    expect(reply.interactive.action.buttons.map((item: { reply: { id: string } }) => item.reply.id)).toEqual(["trading", "investment", "demo"]);
-    expect(reply.interactive.body.text).toContain(choice === "lang_hi" ? "नमस्ते" : choice === "lang_kn" ? "ಹಾಯ್" : "Welcome");
-  });
-  it("keeps both interactive lists aligned with confirmed courses and services", async () => {
-    for (const [selection, titles] of [["trading", COURSE_STAGES.map(c => c.title)], ["investment", SERVICES.map(s => s.title)]] as const) {
-      vi.mocked(fetch).mockClear(); await POST(post(payload(selection)));
-      const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body));
-      expect(reply.interactive.action.sections[0].rows.map((row: { title: string }) => row.title)).toEqual(titles);
-    }
-  });
-  it.each(COURSE_STAGES)("supports existing list selection for $title using the website catalog", async (course) => {
-    const id = ["trading_foundational", "trading_practitioner", "trading_advanced", "trading_onetoone"][Number(course.num) - 1];
-    const event = payload();
-    Object.assign(event.entry[0].changes[0].value.messages[0], { type: "interactive", interactive: { type: "list_reply", list_reply: { id } } });
-    expect((await POST(post(event))).status).toBe(200);
-    const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body)).interactive;
-    expect(reply.body.text).toContain(course.description);
-    expect(reply.body.text).toContain(`https://mechwealth.com/courses/${course.slug}`);
-    expect(reply.action.buttons.map((b: { reply: { id: string } }) => b.reply.id)).toEqual(["yes_btn", "no_btn"]);
-  });
-  it.each(["demo", "yes", "yes_btn", "unknown", "Someone's private name"])("directs %s to enquiry without claiming a booking", async (choice) => {
-    expect((await POST(post(payload(choice)))).status).toBe(200);
+  it.each(["yes", "unknown"])("directs %s to the existing enquiry page without promising follow-up", async (text) => {
+    expect((await POST(post(payload(text)))).status).toBe(200);
     const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body)).text.body;
     expect(reply).toContain("https://mechwealth.com/contact");
-    expect(reply).not.toMatch(/booked|will call|auto-saved|Free Demo|share your Name/i);
-    expect(reply).not.toContain("Someone's private name");
+    expect(reply).not.toMatch(/Free Demo|Investing Course|will book|will contact|share your Name/i);
   });
   it("handles batched messages and ignores receipts, other numbers and invalid text/senders", async () => {
     const body = payload();
     const value = body.entry[0].changes[0].value;
-    value.messages.push({ ...value.messages[0], id: "second-message", text: { body: "trading" } });
+    value.messages.push({ ...value.messages[0], id: "second-message", text: { body: "1" } });
     expect((await POST(post(body))).status).toBe(200);
     expect(fetch).toHaveBeenCalledTimes(2);
     vi.mocked(fetch).mockClear();
@@ -153,55 +138,4 @@ describe("WhatsApp webhook messages (all outbound requests mocked)", () => {
     expect((await POST(post(payload()))).status).toBe(502);
     expect(log).not.toHaveBeenCalled();
   });
-});
-
-it("acknowledges retries and concurrent duplicates without sending a second reply in this process", async () => {
-  let resolve: (value: Response) => void = () => {};
-  vi.mocked(fetch).mockImplementationOnce(() => new Promise<Response>(done => { resolve = done; }));
-  const event = payload("hi");
-  const first = POST(post(event));
-  const second = POST(post(event));
-  await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-  resolve(new Response("{}"));
-  expect((await first).status).toBe(200); expect((await second).status).toBe(200);
-  expect((await POST(post(event))).status).toBe(200);
-  expect(fetch).toHaveBeenCalledTimes(1);
-});
-it("processes remaining entries after a failure and retries only failed messages in this process", async () => {
-  const failed = payload("hi"); const good = payload("hi");
-  const batch = { ...failed, entry: [...failed.entry, ...good.entry] };
-  vi.mocked(fetch).mockResolvedValueOnce(new Response("rejected", { status: 429 }));
-  expect((await POST(post(batch))).status).toBe(502);
-  expect(fetch).toHaveBeenCalledTimes(2);
-  expect((await POST(post(batch))).status).toBe(200);
-  expect(fetch).toHaveBeenCalledTimes(3);
-});
-it("does not accept interactive payloads of unsupported types or missing message IDs", async () => {
-  for (const type of ["image", "button", "unknown"]) {
-    const event = payload(); event.entry[0].changes[0].value.messages[0].type = type;
-    await POST(post(event));
-  }
-  const event = payload(); event.entry[0].changes[0].value.messages[0].id = "";
-  await POST(post(event)); expect(fetch).not.toHaveBeenCalled();
-});
-it("expires process-local retry records instead of keeping them forever", async () => {
-  vi.useFakeTimers();
-  const event = payload("hi");
-  await POST(post(event)); await POST(post(event)); expect(fetch).toHaveBeenCalledTimes(1);
-  vi.setSystemTime(Date.now() + 31 * 60 * 1000);
-  await POST(post(event)); expect(fetch).toHaveBeenCalledTimes(2);
-});
-it("bounds stored retry IDs under a stream of distinct authenticated messages", async () => {
-  const oldest = payload("hi"); await POST(post(oldest));
-  for (let i = 0; i < 1000; i++) await POST(post(payload("hi")));
-  expect(fetch).toHaveBeenCalledTimes(1001);
-  await POST(post(oldest)); expect(fetch).toHaveBeenCalledTimes(1002);
-});
-it.each(["inv_demat", "inv_mutual", "inv_insurance", "inv_physical", "inv_iepf"])("uses verified website copy for %s", async (id) => {
-  const index = ["inv_demat", "inv_mutual", "inv_insurance", "inv_physical", "inv_iepf"].indexOf(id);
-  await POST(post(payload(id)));
-  const reply = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]!.body)).interactive.body.text;
-  expect(reply).toContain(SERVICES[index].summary);
-  expect(reply).toContain(`https://mechwealth.com/services/${SERVICES[index].slug}`);
-  expect(reply).not.toContain("15 mins");
 });

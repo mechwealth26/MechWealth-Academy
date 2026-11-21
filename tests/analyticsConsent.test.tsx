@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AnalyticsManager from "@/components/analytics/AnalyticsManager";
-import { ANALYTICS_CONSENT_KEY, OPEN_CONSENT_EVENT, suspendCookiePreferences } from "@/lib/analyticsConsent";
+import { ANALYTICS_CONSENT_KEY, OPEN_CONSENT_EVENT } from "@/lib/analyticsConsent";
 
 vi.mock("@next/third-parties/google", () => ({
   GoogleAnalytics: ({ gaId }: { gaId: string }) => <span data-testid="google-analytics" data-measurement-id={gaId} />,
@@ -109,59 +109,4 @@ describe("Google Analytics consent gate", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Accept analytics" }));
     expect(screen.queryByTestId("google-analytics")).toBeNull();
   });
-});
-
-it("applies cross-tab withdrawal immediately without losing a visitor's unfinished form", async () => {
-  localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
-  render(<><input aria-label="Unsent enquiry" defaultValue="Please keep these details" /><AnalyticsManager enableVercel={false} /></>);
-  await screen.findByTestId("google-analytics");
-  const field = screen.getByRole("textbox", { name: "Unsent enquiry" }) as HTMLInputElement;
-  field.focus();
-  act(() => {
-    localStorage.setItem(ANALYTICS_CONSENT_KEY, "rejected");
-    window.dispatchEvent(new StorageEvent("storage", { key: ANALYTICS_CONSENT_KEY, newValue: "rejected", storageArea: localStorage }));
-  });
-  expect(screen.queryByTestId("google-analytics")).toBeNull();
-  expect((window as unknown as Record<string, unknown>)["ga-disable-G-5NDD0P1VTN"]).toBe(true);
-  expect(field.value).toBe("Please keep these details"); expect(document.activeElement).toBe(field);
-  act(() => window.dispatchEvent(new StorageEvent("storage", { key: ANALYTICS_CONSENT_KEY, newValue: "accepted", storageArea: localStorage })));
-  expect(screen.getByTestId("google-analytics")).toBeTruthy();
-  expect((window as unknown as Record<string, unknown>)["ga-disable-G-5NDD0P1VTN"]).toBe(false);
-  act(() => window.dispatchEvent(new StorageEvent("storage", { key: null, newValue: null, storageArea: localStorage })));
-  expect(screen.queryByTestId("google-analytics")).toBeNull();
-  expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
-});
-it("disables an already loaded tag on local withdrawal and clears its cookies without a reload", async () => {
-  localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
-  render(<AnalyticsManager enableVercel={false} />); await screen.findByTestId("google-analytics");
-  document.cookie = "_ga=test-only; path=/";
-  act(() => window.dispatchEvent(new Event(OPEN_CONSENT_EVENT)));
-  fireEvent.click(screen.getByRole("button", { name: "Reject" }));
-  expect(screen.queryByTestId("google-analytics")).toBeNull();
-  expect((window as unknown as Record<string, unknown>)["ga-disable-G-5NDD0P1VTN"]).toBe(true);
-  expect(document.cookie).not.toContain("_ga=");
-});
-it("does not reveal consent when another overlay still owns a suspension, including a late mount", async () => {
-  const closeReader = suspendCookiePreferences();
-  const closeMenu = suspendCookiePreferences();
-  try {
-    render(<AnalyticsManager enableVercel={false} />);
-    await act(async () => { await new Promise<void>(resolve => requestAnimationFrame(() => resolve())); });
-    expect(screen.queryByRole("button", { name: "Reject" })).toBeNull();
-    act(() => closeMenu());
-    expect(screen.queryByRole("button", { name: "Reject" })).toBeNull();
-    act(() => closeReader());
-    expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
-  } finally { act(() => { closeReader(); closeMenu(); }); }
-});
-it("does not let a stale startup read overwrite newer cross-tab consent", () => {
-  localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
-  let frame: FrameRequestCallback = () => {};
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(cb => { frame = cb; return 1; });
-  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
-  render(<AnalyticsManager enableVercel={false} />);
-  act(() => window.dispatchEvent(new StorageEvent("storage", { key: ANALYTICS_CONSENT_KEY, newValue: "rejected", storageArea: localStorage })));
-  act(() => frame(0));
-  expect(screen.queryByTestId("google-analytics")).toBeNull();
-  expect((window as unknown as Record<string, unknown>)["ga-disable-G-5NDD0P1VTN"]).toBe(true);
 });

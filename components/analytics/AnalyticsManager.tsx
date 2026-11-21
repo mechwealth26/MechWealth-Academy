@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ANALYTICS_CONSENT_KEY, OPEN_CONSENT_EVENT, SUSPEND_CONSENT_EVENT, cookiePreferencesSuspended } from "@/lib/analyticsConsent";
+import { ANALYTICS_CONSENT_KEY, OPEN_CONSENT_EVENT, SUSPEND_CONSENT_EVENT } from "@/lib/analyticsConsent";
 
 type Consent = "accepted" | "rejected" | null;
 
@@ -12,28 +12,15 @@ function clearGoogleAnalyticsCookies() {
   document.cookie.split(";").forEach((cookie) => {
     const name = cookie.split("=")[0]?.trim();
     if (!name?.startsWith("_ga")) return;
-    const expire = (domain = "") => {
-      document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax${domain ? `; domain=${domain}` : ""}`;
-    };
-    expire();
-    const parts = window.location.hostname.split(".");
-    while (parts.length > 1) { expire(parts.join(".")); parts.shift(); }
+    document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
   });
-}
-
-function applyAnalyticsChoice(gaId: string | undefined, consent: Consent) {
-  if (gaId && gaId !== "G-XXXXXXXXXX") {
-    // Google's documented opt-out prevents an already loaded tag from sending or setting cookies.
-    (window as unknown as Record<string, unknown>)[`ga-disable-${gaId}`] = consent !== "accepted";
-  }
-  if (consent !== "accepted") clearGoogleAnalyticsCookies();
 }
 
 export default function AnalyticsManager({ enableVercel }: { enableVercel: boolean }) {
   // Wait for saved consent before showing a choice the visitor may already have made.
   const [consent, setConsent] = useState<Consent | undefined>(undefined);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
-  const [suspended, setSuspended] = useState(cookiePreferencesSuspended);
+  const [suspended, setSuspended] = useState(false);
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   useEffect(() => {
@@ -44,21 +31,9 @@ export default function AnalyticsManager({ enableVercel }: { enableVercel: boole
       // Storage can be unavailable in hardened browser modes. In that case,
       // keep analytics off and continue to offer the in-session choice.
     }
-    let storageChanged = false;
-    const apply = (value: string | null) => {
-      const next = value === "accepted" || value === "rejected" ? value : null;
-      applyAnalyticsChoice(gaId, next);
-      setConsent(next);
-    };
-    const frame = window.requestAnimationFrame(() => {
-      if (!storageChanged) apply(stored);
-    });
-    const onStorage = (event: StorageEvent) => {
-      if (event.storageArea !== window.localStorage || (event.key !== ANALYTICS_CONSENT_KEY && event.key !== null)) return;
-      storageChanged = true;
-      apply(event.newValue);
-    };
-    window.addEventListener("storage", onStorage);
+    const frame = window.requestAnimationFrame(() =>
+      setConsent(stored === "accepted" || stored === "rejected" ? stored : null)
+    );
 
     const openPreferences = () => setPreferencesOpen(true);
     const suspendPreferences = (event: Event) =>
@@ -67,14 +42,13 @@ export default function AnalyticsManager({ enableVercel }: { enableVercel: boole
     window.addEventListener(SUSPEND_CONSENT_EVENT, suspendPreferences);
     return () => {
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("storage", onStorage);
       window.removeEventListener(OPEN_CONSENT_EVENT, openPreferences);
       window.removeEventListener(SUSPEND_CONSENT_EVENT, suspendPreferences);
     };
-  }, [gaId]);
+  }, []);
 
   const choose = (next: Exclude<Consent, null>) => {
-    applyAnalyticsChoice(gaId, next);
+    const previouslyAccepted = consent === "accepted";
     try {
       window.localStorage.setItem(ANALYTICS_CONSENT_KEY, next);
     } catch {
@@ -82,6 +56,13 @@ export default function AnalyticsManager({ enableVercel }: { enableVercel: boole
     }
     setConsent(next);
     setPreferencesOpen(false);
+
+    if (next === "rejected") {
+      clearGoogleAnalyticsCookies();
+      // A loaded third-party script cannot be reliably unloaded. Reload only
+      // when consent is withdrawn so no further GA requests can be made.
+      if (previouslyAccepted) window.location.reload();
+    }
   };
 
   const showBanner = !suspended && consent !== undefined && (consent === null || preferencesOpen);

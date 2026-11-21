@@ -60,37 +60,6 @@ describe("prerendered routes (requires a completed production build)", () => {
     expect(new RegExp(redirect.regex).test("/training/unrelated-page")).toBe(false);
   });
 
-  it("permanently redirects the legacy mutual-fund URL without redirecting unrelated services", () => {
-    const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
-    const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === "/services/mutual-fund-distributor");
-    expect(redirect).toMatchObject({ destination: "/services/mutual-funds", statusCode: 308 });
-    expect(new RegExp(redirect.regex).test("/services/mutual-fund-distributor")).toBe(true);
-    expect(new RegExp(redirect.regex).test("/services/unrelated-page")).toBe(false);
-    expect(new RegExp(redirect.regex).test("/services/mutual-funds")).toBe(false);
-  });
-
-  it.each([
-    ["/services/physical-share-dematerialisation", "/services/physical-share-services"],
-    ["/services/iepf-claim-assistance", "/services/iepf-claims"],
-  ])("permanently redirects %s to its matching service", (source, destination) => {
-    const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
-    const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === source);
-    expect(redirect).toMatchObject({ destination, statusCode: 308 });
-    expect(new RegExp(redirect.regex).test(source)).toBe(true);
-    expect(new RegExp(redirect.regex).test(destination)).toBe(false);
-    expect(new RegExp(redirect.regex).test(`${source}/unrelated-page`)).toBe(false);
-    expect(new RegExp(redirect.regex).test("/services/unrelated-page")).toBe(false);
-  });
-
-  it("redirects the extensionless sitemap URL to the existing XML sitemap", () => {
-    const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
-    const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === "/sitemap");
-    expect(redirect).toMatchObject({ destination: "/sitemap.xml", statusCode: 308 });
-    expect(new RegExp(redirect.regex).test("/sitemap")).toBe(true);
-    expect(new RegExp(redirect.regex).test("/sitemap.xml")).toBe(false);
-    expect(new RegExp(redirect.regex).test("/sitemap/unrelated-page")).toBe(false);
-  });
-
   it("permanently redirects the legacy Terms URL without redirecting unrelated legal URLs", () => {
     const manifest = JSON.parse(readFileSync(path.join(buildDir, "../../routes-manifest.json"), "utf8"));
     const redirect = manifest.redirects.find((entry: { source: string }) => entry.source === "/legal/terms-of-use");

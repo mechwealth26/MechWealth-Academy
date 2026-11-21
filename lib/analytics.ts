@@ -22,6 +22,6 @@ export function trackConversion(name: string, properties: EventProperties = {}) 
     gaId &&
     gaId !== "G-XXXXXXXXXX"
   ) {
-    sendGAEvent({ event: name, ...properties });
+    sendGAEvent("event", name, properties);
   }
 }

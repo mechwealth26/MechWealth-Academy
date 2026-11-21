@@ -13,7 +13,7 @@ import {
   clickableCardInteraction,
 } from "@/components/ui/ClickableCard";
 import { useLenis } from "@/hooks/useLenis";
-import { SUSPEND_CONSENT_EVENT } from "@/lib/analyticsConsent";
+import { suspendCookiePreferences } from "@/lib/analyticsConsent";
 import {
   RESOURCES,
   RESOURCE_CATEGORIES,
@@ -340,7 +340,7 @@ function ResourceReader({
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    window.dispatchEvent(new CustomEvent(SUSPEND_CONSENT_EVENT, { detail: true }));
+    const restoreCookiePreferences = suspendCookiePreferences();
 
     const header =
       document.querySelector<HTMLElement>("body > header") ??
@@ -430,7 +430,7 @@ function ResourceReader({
       });
       lenis?.start();
       document.documentElement.style.overflow = "";
-      window.dispatchEvent(new CustomEvent(SUSPEND_CONSENT_EVENT, { detail: false }));
+      restoreCookiePreferences();
     };
   }, [onClose, lenis]);
 

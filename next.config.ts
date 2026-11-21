@@ -28,6 +28,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/services/mutual-fund-distributor",
+        destination: "/services/mutual-funds",
+        permanent: true,
+      },
+      {
+        source: "/services/physical-share-dematerialisation",
+        destination: "/services/physical-share-services",
+        permanent: true,
+      },
+      {
+        source: "/services/iepf-claim-assistance",
+        destination: "/services/iepf-claims",
+        permanent: true,
+      },
+      {
+        source: "/sitemap",
+        destination: "/sitemap.xml",
+        permanent: true,
+      },
+      {
         source: "/legal/terms-of-use",
         destination: "/terms",
         permanent: true,

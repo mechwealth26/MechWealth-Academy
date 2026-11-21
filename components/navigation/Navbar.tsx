@@ -9,6 +9,7 @@ import { buttonClasses } from "@/lib/buttonStyles";
 import { useLenis } from "@/hooks/useLenis";
 import BrandMark from "@/components/ui/BrandMark";
 import ThemeSwitcher from "@/components/theme/ThemeSwitcher";
+import { suspendCookiePreferences } from "@/lib/analyticsConsent";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const FOCUSABLE_SELECTOR = [
@@ -81,6 +82,8 @@ export default function Navbar() {
     desktop.addEventListener("change", closeOnDesktop);
     closeOnDesktop();
 
+    const restoreCookiePreferences = suspendCookiePreferences();
+
     const ownsScrollLock = document.documentElement.style.overflow !== "hidden";
     lenis?.stop();
     if (ownsScrollLock) document.documentElement.style.overflow = "hidden";
@@ -136,6 +139,7 @@ export default function Navbar() {
     const menuBtn = menuBtnRef.current;
     const homeLink = homeLinkRef.current;
     return () => {
+      restoreCookiePreferences();
       desktop.removeEventListener("change", closeOnDesktop);
       clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKey);

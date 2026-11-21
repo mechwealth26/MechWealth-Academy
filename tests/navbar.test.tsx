@@ -2,6 +2,8 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Navbar from "@/components/navigation/Navbar";
 import WebsiteChat from "@/components/WebsiteChat";
+import AnalyticsManager from "@/components/analytics/AnalyticsManager";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analyticsConsent";
 
 const lenis = vi.hoisted(() => ({ stop: vi.fn(), start: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/resources" }));
@@ -14,6 +16,7 @@ let desktop: boolean;
 let mediaListeners: Set<() => void>;
 
 beforeEach(() => {
+  localStorage.clear();
   vi.useFakeTimers();
   desktop = false;
   mediaListeners = new Set();
@@ -41,6 +44,7 @@ function renderPage() {
     <main id="main"><button>Page action</button></main>
     <footer>Footer</footer>
     <WebsiteChat />
+    <AnalyticsManager enableVercel={false} />
   </>);
 }
 
@@ -125,4 +129,20 @@ describe("mobile menu cleanup", () => {
     expect(document.documentElement.style.overflow).toBe("hidden");
     expect(lenis.start).not.toHaveBeenCalled();
   });
+});
+
+it("suspends consent while the mobile menu owns focus, then restores both on Escape and resize", () => {
+  renderPage();
+  act(() => vi.advanceTimersByTime(100));
+  expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
+  openMenu();
+  expect(screen.queryByRole("button", { name: "Reject" })).toBeNull();
+  expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBeNull();
+  fireEvent.keyDown(window, { key: "Escape" });
+  act(() => vi.advanceTimersByTime(100));
+  expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Open menu" }));
+  openMenu(); crossBreakpoint(true);
+  expect(screen.getByRole("button", { name: "Reject" })).toBeTruthy();
+  expect(document.documentElement.style.overflow).toBe("");
 });
